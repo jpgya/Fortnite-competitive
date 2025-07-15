@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>フォートナイト競技カレンダー</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, #0d0d0d, #1a1a1a);
+      font-family: 'Orbitron', sans-serif;
+      color: #fff;
+    }
+
+    header {
+      background: #0f0f0f;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 3px solid #00f2ff;
+      box-shadow: 0 4px 20px rgba(0, 242, 255, 0.2);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2em;
+      color: #00f2ff;
+      text-shadow: 0 0 10px #00f2ff;
+    }
+
+    .calendar {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 20px;
+      background: rgba(20, 20, 20, 0.8);
+      border: 1px solid #333;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+    }
+
+    .event {
+      background: #111;
+      border-left: 6px solid #00f2ff;
+      margin: 15px 0;
+      padding: 15px;
+      border-radius: 8px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .event:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+    }
+
+    .event-date {
+      color: #0ff;
+      font-size: 1.2em;
+      margin-bottom: 5px;
+      text-shadow: 0 0 5px #00f2ff;
+    }
+
+    .event-title {
+      font-size: 1.1em;
+      color: #eee;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 1.4em;
+      }
+
+      .calendar {
+        padding: 15px;
+      }
+
+      .event {
+        padding: 10px;
+      }
+
+      .event-date {
+        font-size: 1em;
+      }
+
+      .event-title {
+        font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>フォートナイト競技カレンダー</h1>
+  </header>
+
+  <div class="calendar" id="calendar">
+    <p>読み込み中...</p>
+  </div>
+
+  <script>
+    async function loadEvents() {
+      try {
+        const response = await fetch("events.json");
+        const events = await response.json();
+
+        const calendar = document.getElementById("calendar");
+        calendar.innerHTML = "";
+
+        events.forEach(event => {
+          const div = document.createElement("div");
+          div.className = "event";
+          div.innerHTML = `
+            <div class="event-date">${event.date}</div>
+            <div class="event-title">${event.title}</div>
+          `;
+          calendar.appendChild(div);
+        });
+      } catch (error) {
+        document.getElementById("calendar").innerHTML =
+          "<p>イベントの読み込みに失敗しました。</p>";
+        console.error("イベント読み込みエラー:", error);
+      }
+    }
+
+    loadEvents();
+  </script>
+</body>
+</html>
