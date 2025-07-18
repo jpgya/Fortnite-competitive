@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>フォートナイト大会スケジュール</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+    }
+
+    header {
+      background: #161b22;
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid #30363d;
+    }
+
+    header h1 {
+      margin: 0;
+      color: #58a6ff;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+
+    .tournament {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 0 8px #00000055;
+    }
+
+    .tournament img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+
+    .tournament h2 {
+      color: #58a6ff;
+      margin-top: 0.5rem;
+    }
+
+    .info, .rewards {
+      margin-top: 1rem;
+    }
+
+    .reward {
+      background: #21262d;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 6px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 1rem;
+      color: #8b949e;
+      border-top: 1px solid #30363d;
+    }
+
+    .loading {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 600px) {
+      .tournament {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>フォートナイト 大会スケジュール</h1>
+  </header>
+  <div class="container" id="content">
+    <div class="loading">読み込み中...</div>
+  </div>
+  <div class="footer">
+    © 2025 Fortnite Japan Fanmade
+  </div>
+
+  <script>
+    async function loadJSONs() {
+      const res = await fetch('jsondata/');
+      const text = await res.text();
+      const matches = text.match(/href="([^"]+\.json)"/g) || [];
+
+      const files = matches.map(m => m.match(/"([^"]+)"/)[1]);
+      return files;
+    }
+
+    function toJST(iso) {
+      const date = new Date(iso);
+      date.setHours(date.getHours() + 9);
+      return date.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+    }
+
+    function rewardLabel(r) {
+      if (r.scoringType === "value") {
+        return `${r.threshold}ポイントで「${r.value.split(":")[1]}」獲得`;
+      } else if (r.scoringType === "rank") {
+        return `上位${r.threshold}位で「${r.value.split(":")[1]}」獲得`;
+      } else {
+        return `報酬: ${r.value}`;
+      }
+    }
+
+    async function render() {
+      const content = document.getElementById("content");
+      content.innerHTML = "";
+
+      const files = await loadJSONs();
+      if (files.length === 0) {
+        content.innerHTML = "<p>大会データが見つかりません。</p>";
+        return;
+      }
+
+      for (const file of files) {
+        try {
+          const res = await fetch(`jsondata/${file}`);
+          const json = await res.json();
+          const key = Object.keys(json[0])[0];
+          const data = json[0][key];
+          const event = data.S36_FNCSCommunityCup_ASIA?.[0];
+
+          const el = document.createElement("div");
+          el.className = "tournament";
+
+          el.innerHTML = `
+            <img src="${data.tournament_view_background_image}" alt="大会画像">
+            <h2>${key}</h2>
+            <div class="info">
+              <p><strong>日時：</strong> ${toJST(event.beginTime)} ～ ${toJST(event.endTime)}</p>
+              <p><strong>形式：</strong> ソロ / 最大${event.matchCap}マッチ</p>
+              <p><strong>必要トークン：</strong> ${event.additionalRequirements.join(", ") || "なし"}</p>
+            </div>
+            <div class="rewards">
+              <strong>🎁 報酬:</strong>
+              ${event.payouts.map(reward => `
+                <div class="reward">${rewardLabel(reward)}</div>
+              `).join("")}
+            </div>
+          `;
+
+          content.appendChild(el);
+        } catch (e) {
+          console.error("エラー:", e);
+        }
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
