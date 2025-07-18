@@ -92,7 +92,7 @@
 
   <script>
     async function loadJSONs() {
-      const res = await fetch('jsondata/');
+      const res = await fetch('jsondate/');
       const text = await res.text();
       const matches = text.match(/href="([^"]+\.json)"/g) || [];
 
@@ -128,7 +128,7 @@
 
       for (const file of files) {
         try {
-          const res = await fetch(`jsondata/${file}`);
+          const res = await fetch(`jsondate/${file}`);
           const json = await res.json();
           const key = Object.keys(json[0])[0];
           const data = json[0][key];
