@@ -114,11 +114,11 @@
       let files = [];
 
       try {
-        const res = await fetch("jsondata/index.json");
+        const res = await fetch("jsondate/index.json");
         files = await res.json();
       } catch (e) {
         console.error("index.jsonの読み込み失敗:", e);
-        content.innerHTML = "<p style='color:red;'>index.jsonの読み込みに失敗しました。</p>";
+        content.innerHTML = "<p style='color:red;'> Not found 404</p>";
         return;
       }
 
